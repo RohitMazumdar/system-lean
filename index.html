@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="THE SYSTEM">
+<meta name="theme-color" content="#03080f">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>THE SYSTEM — ROHIT</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:     #03080f;
+  --panel:  rgba(5,14,28,0.94);
+  --blue:   #38bdf8;
+  --gold:   #fbbf24;
+  --red:    #f87171;
+  --green:  #34d399;
+  --orange: #fb923c;
+  --purple: #a78bfa;
+  --b2:     rgba(56,189,248,0.08);
+  --b3:     rgba(56,189,248,0.18);
+  --t1:     #cbd5e1;
+  --t2:     #475569;
+  --glow:   0 0 18px rgba(56,189,248,0.12);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'Barlow',sans-serif;overflow:hidden}
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.025) 2px,rgba(0,0,0,0.025) 4px);pointer-events:none;z-index:9999}
+
+/* ── BOOT ── */
+#boot{position:fixed;inset:0;z-index:1000;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.4rem;padding:1rem}
+.bw{font-family:'Orbitron',monospace;font-size:clamp(0.95rem,3vw,1.7rem);font-weight:900;color:var(--blue);text-align:center;letter-spacing:.1em;animation:bflash .5s steps(1) infinite;text-shadow:0 0 35px var(--blue)}
+@keyframes bflash{50%{opacity:.25}}
+.bl{font-family:'Share Tech Mono',monospace;font-size:.72rem;color:rgba(56,189,248,.45);opacity:0;animation:lin .1s ease forwards}
+.bl.ok{color:var(--green)}
+@keyframes lin{to{opacity:1}}
+.bp{font-family:'Orbitron',monospace;font-size:.8rem;color:rgba(56,189,248,.35);letter-spacing:.25em;opacity:0;animation:lin .3s ease 3.2s forwards;text-align:center}
+
+/* ── LAYOUT ── */
+#app{display:none;height:100vh;flex-direction:column;overflow:hidden}
+#app.on{display:flex}
+
+/* ── TOPBAR ── */
+.tb{display:flex;align-items:center;justify-content:space-between;padding:.5rem 1rem;background:rgba(2,5,10,.98);border-bottom:1px solid var(--b2);flex-shrink:0;gap:.6rem}
+.tb-logo{font-family:'Orbitron',monospace;font-size:.7rem;font-weight:900;color:var(--blue);letter-spacing:.2em;text-shadow:0 0 10px rgba(56,189,248,.3)}
+.tb-lv{font-family:'Orbitron',monospace;font-size:.65rem;color:var(--gold);background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.2);padding:.15rem .5rem}
+.tb-right{display:flex;align-items:center;gap:.5rem}
+.tb-date{font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--t2)}
+.tb-rank{font-family:'Orbitron',monospace;font-size:.6rem;color:var(--purple);border:1px solid rgba(167,139,250,.25);padding:.15rem .45rem}
+
+/* ── COUNTDOWN STRIP ── */
+.cd-strip{background:rgba(248,113,113,.06);border-bottom:1px solid rgba(248,113,113,.2);padding:.4rem 1rem;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.cd-label{font-size:.7rem;color:rgba(248,113,113,.8)}
+.cd-label strong{color:var(--red)}
+.cd-num{font-family:'Orbitron',monospace;font-size:1rem;font-weight:900;color:var(--red);text-shadow:0 0 10px rgba(248,113,113,.35);animation:bflash 1.2s steps(1) infinite}
+
+/* ── NAV ── */
+.nav{display:flex;background:rgba(2,5,10,.96);border-bottom:1px solid var(--b2);flex-shrink:0;overflow-x:auto;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nb{flex:1;min-width:60px;padding:.5rem .4rem;background:none;border:none;border-bottom:2px solid transparent;color:var(--t2);font-family:'Orbitron',monospace;font-size:.5rem;letter-spacing:.08em;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:.15rem;white-space:nowrap}
+.nb .ni{font-size:.95rem}
+.nb:hover{color:var(--blue)}
+.nb.on{color:var(--blue);border-bottom-color:var(--blue);background:rgba(56,189,248,.03)}
+
+/* ── SCREENS ── */
+.screens{flex:1;overflow:hidden;position:relative}
+.sc{display:none;height:100%;overflow-y:auto;padding:.9rem;scrollbar-width:thin;scrollbar-color:var(--b3) transparent}
+.sc.on{display:block}
+.sc::-webkit-scrollbar{width:3px}
+.sc::-webkit-scrollbar-thumb{background:var(--b3)}
+
+/* ── SECTION TITLE ── */
+.st{font-family:'Orbitron',monospace;font-size:.6rem;letter-spacing:.22em;color:var(--blue);margin-bottom:.6rem;display:flex;align-items:center;gap:.5rem}
+.st::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--b3),transparent)}
+
+/* ── PANEL ── */
+.pn{background:var(--panel);border:1px solid var(--b2);padding:.9rem;margin-bottom:.8rem}
+
+/* ── PLAYER HERO ── */
+.hero{background:var(--panel);border:1px solid var(--b3);padding:1rem;margin-bottom:.8rem;display:flex;gap:.9rem;align-items:flex-start;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--blue),transparent);animation:scan 3s linear infinite}
+@keyframes scan{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.av{width:66px;height:66px;flex-shrink:0;border:1.5px solid var(--blue);background:rgba(56,189,248,.04);display:flex;align-items:center;justify-content:center;font-size:1.8rem;box-shadow:var(--glow);position:relative}
+.av::after{content:'';position:absolute;inset:-3px;border:1px solid rgba(56,189,248,.12)}
+.hi{flex:1;min-width:0}
+.hn{font-family:'Orbitron',monospace;font-size:clamp(.8rem,2.8vw,1rem);font-weight:700;color:#fff}
+.hc{font-size:.65rem;color:var(--purple);letter-spacing:.08em;margin:.15rem 0 .6rem}
+.hlr{display:flex;align-items:center;gap:.7rem}
+.hlv{font-family:'Orbitron',monospace;font-size:1.2rem;font-weight:900;color:var(--gold);text-shadow:0 0 10px rgba(251,191,36,.3);flex-shrink:0}
+.ew{flex:1}
+.el{font-family:'Share Tech Mono',monospace;font-size:.55rem;color:var(--t2);margin-bottom:.2rem;display:flex;justify-content:space-between}
+.bar{height:5px;background:rgba(255,255,255,.04);border:1px solid var(--b2);overflow:hidden}
+.bi{height:100%;transition:width 1.2s cubic-bezier(.22,1,.36,1);position:relative}
+.bi::after{content:'';position:absolute;right:0;top:0;width:3px;height:100%;background:#fff;opacity:.6;box-shadow:0 0 4px currentColor}
+.bb{background:linear-gradient(90deg,#0c4a6e,var(--blue))}
+.bg{background:linear-gradient(90deg,#064e3b,var(--green))}
+.br{background:linear-gradient(90deg,#7f1d1d,var(--red))}
+.bo{background:linear-gradient(90deg,#7c2d12,var(--orange))}
+.bgo{background:linear-gradient(90deg,#78350f,var(--gold))}
+
+/* ── STATS ── */
+.sg{display:grid;grid-template-columns:repeat(3,1fr);gap:.45rem;margin-bottom:.8rem}
+.sb{background:var(--panel);border:1px solid var(--b2);padding:.6rem .4rem;text-align:center;transition:border-color .2s;cursor:default}
+.sb:hover{border-color:rgba(56,189,248,.3)}
+.si{font-size:1rem;margin-bottom:.1rem}
+.sl{font-family:'Orbitron',monospace;font-size:.45rem;letter-spacing:.12em;color:var(--t2);margin-bottom:.2rem}
+.sv{font-family:'Orbitron',monospace;font-size:1.2rem;font-weight:700;color:var(--blue)}
+
+/* ── PHASE TRACKER ── */
+.phase-row{display:flex;gap:.4rem;margin-bottom:.8rem;overflow-x:auto;scrollbar-width:none;padding-bottom:.2rem}
+.phase-row::-webkit-scrollbar{display:none}
+.ph{flex:1;min-width:80px;border:1px solid var(--b2);padding:.6rem .5rem;text-align:center;position:relative;transition:all .2s}
+.ph.active{border-color:var(--blue);background:rgba(56,189,248,.04);box-shadow:var(--glow)}
+.ph.done{border-color:rgba(52,211,153,.3);background:rgba(52,211,153,.03)}
+.ph.locked{opacity:.35}
+.ph-num{font-family:'Orbitron',monospace;font-size:.55rem;color:var(--t2);letter-spacing:.1em;margin-bottom:.2rem}
+.ph-name{font-size:.7rem;font-weight:600;color:var(--t1);margin-bottom:.15rem}
+.ph-dates{font-size:.58rem;color:var(--t2)}
+.ph-badge{position:absolute;top:4px;right:4px;font-size:.5rem;font-family:'Orbitron',monospace;padding:.1rem .3rem;border:1px solid}
+.ph-badge.a{color:var(--blue);border-color:rgba(56,189,248,.3);background:rgba(56,189,248,.08);animation:bflash 1.5s ease infinite}
+.ph-badge.d{color:var(--green);border-color:rgba(52,211,153,.3)}
+.ph-badge.u{color:var(--t2);border-color:var(--b2)}
+
+/* ── QUESTS ── */
+.qtabs{display:flex;gap:.35rem;margin-bottom:.7rem;overflow-x:auto;scrollbar-width:none}
+.qtabs::-webkit-scrollbar{display:none}
+.qt{padding:.25rem .7rem;background:none;border:1px solid var(--b2);color:var(--t2);font-family:'Orbitron',monospace;font-size:.5rem;letter-spacing:.08em;cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0}
+.qt.on,.qt:hover{border-color:var(--blue);color:var(--blue);background:rgba(56,189,248,.04)}
+.ql{display:flex;flex-direction:column;gap:.35rem}
+.qc{background:var(--panel);border:1px solid var(--b2);padding:.65rem;display:flex;gap:.65rem;align-items:flex-start;transition:border-color .15s;cursor:pointer}
+.qc:hover{border-color:rgba(56,189,248,.28)}
+.qc.done{opacity:.38}
+.qc.done .qn{text-decoration:line-through;color:var(--t2)}
+.qck{width:17px;height:17px;border:1.5px solid var(--blue);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.6rem;transition:all .2s;margin-top:1px}
+.qck.done{background:rgba(52,211,153,.1);border-color:var(--green);color:var(--green)}
+.qb{flex:1;min-width:0}
+.qtg{display:flex;gap:.25rem;margin-bottom:.25rem;flex-wrap:wrap}
+.tag{font-family:'Orbitron',monospace;font-size:.45rem;letter-spacing:.06em;padding:.08rem .3rem;border:1px solid}
+.t-hpcl{color:var(--red);border-color:rgba(248,113,113,.3);background:rgba(248,113,113,.05)}
+.t-bsnl{color:var(--green);border-color:rgba(52,211,153,.3);background:rgba(52,211,153,.05)}
+.t-ai{color:var(--blue);border-color:rgba(56,189,248,.3);background:rgba(56,189,248,.05)}
+.t-gym{color:var(--orange);border-color:rgba(251,146,60,.3);background:rgba(251,146,60,.05)}
+.t-life{color:var(--purple);border-color:rgba(167,139,250,.3);background:rgba(167,139,250,.05)}
+.t-daily{color:#94a3b8;border-color:rgba(148,163,184,.25);background:rgba(148,163,184,.04)}
+.t-main{color:var(--gold);border-color:rgba(251,191,36,.3);background:rgba(251,191,36,.05)}
+.qn{font-size:.82rem;font-weight:600;color:var(--t1);margin-bottom:.12rem}
+.qd{font-size:.64rem;color:var(--t2)}
+.qr{text-align:right;flex-shrink:0}
+.qexp{font-family:'Orbitron',monospace;font-size:.65rem;color:var(--gold)}
+.qtm{font-size:.57rem;color:var(--t2);margin-top:.15rem}
+
+/* ── PENALTY ── */
+.pal{background:rgba(248,113,113,.05);border:1px solid rgba(248,113,113,.22);padding:.65rem;margin-bottom:.7rem;display:none;gap:.6rem;align-items:center}
+.pal.on{display:flex}
+.pai{font-size:1rem;animation:bflash 1s steps(1) infinite}
+.pat{font-size:.72rem;color:rgba(248,113,113,.85)}
+.pat strong{color:var(--red)}
+
+/* ── SCHEDULE ── */
+.tl{display:flex;flex-direction:column}
+.tr{display:flex;gap:0;position:relative}
+.tt{font-family:'Share Tech Mono',monospace;font-size:.58rem;color:var(--t2);width:54px;flex-shrink:0;padding:.55rem .45rem .55rem 0;text-align:right;line-height:1.2}
+.tdw{width:22px;flex-shrink:0;display:flex;flex-direction:column;align-items:center}
+.td{width:9px;height:9px;border-radius:50%;border:2px solid var(--blue);background:var(--bg);margin-top:.7rem;flex-shrink:0;box-shadow:0 0 5px rgba(56,189,248,.25)}
+.tln{flex:1;width:1px;background:var(--b2)}
+.tc{flex:1;background:var(--panel);border:1px solid var(--b2);padding:.55rem .7rem;margin:.25rem 0 .25rem .35rem;transition:border-color .2s}
+.tc:hover{border-color:rgba(56,189,248,.25)}
+.tc.now{border-color:var(--blue);box-shadow:var(--glow)}
+.tc.gym{border-color:rgba(251,146,60,.2)}
+.tc.meal{border-color:rgba(251,191,36,.18)}
+.tc.work{border-color:rgba(148,163,184,.12)}
+.tlb{font-size:.78rem;font-weight:600;color:var(--t1);margin-bottom:.12rem;display:flex;align-items:center;gap:.4rem;flex-wrap:wrap}
+.trk{font-family:'Orbitron',monospace;font-size:.46rem;letter-spacing:.08em;padding:.08rem .28rem;border:1px solid}
+.now-b{font-family:'Orbitron',monospace;font-size:.46rem;padding:.1rem .35rem;background:rgba(56,189,248,.08);border:1px solid var(--blue);color:var(--blue);animation:bflash .9s ease infinite}
+.ts{font-size:.62rem;color:var(--t2)}
+
+/* ── ROADMAP ── */
+.wc{background:var(--panel);border:1px solid var(--b2);margin-bottom:.4rem;overflow:hidden}
+.wh{display:flex;align-items:center;justify-content:space-between;padding:.65rem .75rem;cursor:pointer;transition:background .2s;gap:.5rem}
+.wh:hover{background:rgba(56,189,248,.025)}
+.wt{font-family:'Orbitron',monospace;font-size:.6rem;color:var(--t1);letter-spacing:.08em}
+.wd{font-size:.57rem;color:var(--t2);margin-top:.1rem}
+.ws{font-family:'Orbitron',monospace;font-size:.48rem;letter-spacing:.06em;padding:.12rem .4rem;border:1px solid;flex-shrink:0}
+.ws.cur{color:var(--blue);border-color:rgba(56,189,248,.3);background:rgba(56,189,248,.06);animation:bflash 1.8s ease infinite}
+.ws.don{color:var(--green);border-color:rgba(52,211,153,.3);background:rgba(52,211,153,.05)}
+.ws.up{color:var(--t2);border-color:var(--b2)}
+.ws.urg{color:var(--red);border-color:rgba(248,113,113,.3);background:rgba(248,113,113,.06);animation:bflash 1s ease infinite}
+.wb{display:none;padding:.7rem;border-top:1px solid var(--b2)}
+.wb.op{display:block}
+.wtp{display:flex;gap:.55rem;align-items:flex-start;padding:.35rem 0;border-bottom:1px solid var(--b2);font-size:.72rem}
+.wtp:last-child{border-bottom:none}
+.wdot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.wr{color:var(--red)}.wg{background:var(--green)}.wbl{background:var(--blue)}.wrd{background:var(--red)}
+.wlb{color:var(--t1)}
+.wsb{color:var(--t2);font-size:.62rem;margin-top:.08rem}
+
+/* ── SHADOW ARMY ── */
+.shg{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:.45rem}
+.shc{background:rgba(4,9,20,.9);border:1px solid rgba(167,139,250,.14);padding:.65rem .35rem;text-align:center;transition:all .2s;cursor:pointer;position:relative}
+.shc.ul:hover{border-color:var(--purple);box-shadow:0 0 10px rgba(167,139,250,.1)}
+.shc.lk{opacity:.2;cursor:not-allowed;filter:grayscale(1)}
+.shi{font-size:1.5rem;margin-bottom:.2rem}
+.shn{font-family:'Orbitron',monospace;font-size:.48rem;color:rgba(167,139,250,.8);letter-spacing:.04em}
+.shr{font-size:.52rem;color:var(--t2);margin-top:.12rem}
+.shd{font-size:.54rem;color:rgba(56,189,248,.45);margin-top:.15rem;line-height:1.3}
+.shreq{position:absolute;top:3px;right:3px;font-size:.46rem;color:var(--t2);font-family:'Orbitron',monospace}
+
+/* ── ADD QUEST ── */
+.ap{background:var(--panel);border:1px solid var(--b2);padding:.75rem;margin-top:.7rem}
+.ar{display:flex;gap:.4rem;flex-wrap:wrap}
+.si2{background:rgba(56,189,248,.03);border:1px solid var(--b2);color:var(--t1);padding:.4rem .6rem;font-family:'Barlow',sans-serif;font-size:.78rem;outline:none;transition:border-color .2s;flex:1;min-width:110px}
+.si2:focus{border-color:var(--blue)}
+.si2::placeholder{color:var(--t2);font-size:.72rem}
+.ss{background:rgba(56,189,248,.03);border:1px solid var(--b2);color:var(--t1);padding:.4rem .55rem;font-family:'Barlow',sans-serif;font-size:.75rem;outline:none;cursor:pointer}
+.sbtn{background:rgba(56,189,248,.07);border:1px solid var(--blue);color:var(--blue);padding:.4rem .9rem;font-family:'Orbitron',monospace;font-size:.55rem;letter-spacing:.1em;cursor:pointer;transition:all .2s}
+.sbtn:hover{background:rgba(56,189,248,.14);box-shadow:0 0 8px rgba(56,189,248,.12)}
+
+/* ── NOTIF ── */
+#notif{position:fixed;top:.7rem;left:50%;transform:translateX(-50%) translateY(-70px);background:rgba(3,8,15,.98);border:1px solid var(--blue);padding:.6rem 1.3rem;font-family:'Orbitron',monospace;font-size:.68rem;color:var(--blue);letter-spacing:.08em;z-index:500;box-shadow:0 0 20px rgba(56,189,248,.18);transition:transform .32s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;max-width:92vw;overflow:hidden;text-overflow:ellipsis;text-align:center}
+#notif.on{transform:translateX(-50%) translateY(0)}
+#notif.gold{border-color:var(--gold);color:var(--gold);box-shadow:0 0 20px rgba(251,191,36,.18)}
+#notif.red{border-color:var(--red);color:var(--red)}
+
+/* misc */
+.div{height:1px;background:var(--b2);margin:.65rem 0}
+.empty{text-align:center;padding:1.8rem;color:var(--t2);font-size:.78rem}
+
+@media(max-width:380px){.sg{grid-template-columns:repeat(2,1fr)}.av{width:54px;height:54px;font-size:1.5rem}}
+</style>
+</head>
+<body>
+
+<!-- BOOT -->
+<div id="boot">
+  <div class="bw">⚠ SYSTEM ALERT ⚠<br><span style="font-size:.52em;opacity:.65">LEAN PROTOCOL ACTIVATED</span></div>
+  <div style="display:flex;flex-direction:column;gap:.35rem;width:min(380px,90vw)" id="bl"></div>
+  <div class="bp">PLAYER: ROHIT MAZUMDAR // MAY 3 TARGET</div>
+</div>
+
+<!-- NOTIF -->
+<div id="notif"></div>
+
+<!-- APP -->
+<div id="app">
+  <div class="tb">
+    <div style="display:flex;align-items:center;gap:.6rem">
+      <div class="tb-logo">◈ THE SYSTEM</div>
+      <div class="tb-lv">Lv.<span id="tbLv">1</span></div>
+    </div>
+    <div class="tb-right">
+      <div class="tb-date" id="tbDate"></div>
+      <div class="tb-rank" id="tbRank">E-RANK</div>
+    </div>
+  </div>
+
+  <!-- HPCL countdown strip -->
+  <div class="cd-strip">
+    <div class="cd-label"><strong>HPCL CBT</strong> — May 3, 2026</div>
+    <div style="display:flex;align-items:center;gap:.5rem">
+      <div style="font-size:.62rem;color:var(--t2)">DAYS LEFT</div>
+      <div class="cd-num" id="cdDays">--</div>
+    </div>
+  </div>
+
+  <nav class="nav">
+    <button class="nb on" onclick="sw('status',this)"><span class="ni">⚔️</span>STATUS</button>
+    <button class="nb" onclick="sw('quests',this)"><span class="ni">📋</span>QUESTS</button>
+    <button class="nb" onclick="sw('schedule',this)"><span class="ni">🕐</span>SCHEDULE</button>
+    <button class="nb" onclick="sw('roadmap',this)"><span class="ni">🗺️</span>ROADMAP</button>
+    <button class="nb" onclick="sw('army',this)"><span class="ni">👥</span>ARMY</button>
+  </nav>
+
+  <div class="screens">
+
+    <!-- STATUS -->
+    <div class="sc on" id="sc-status">
+
+      <!-- URGENT APPLY BANNER -->
+      <div style="background:rgba(248,113,113,.06);border:1px solid rgba(248,113,113,.28);padding:.6rem .85rem;margin-bottom:.75rem;display:flex;align-items:center;gap:.75rem">
+        <div style="font-size:1rem;animation:bflash .8s steps(1) infinite">⚡</div>
+        <div style="font-size:.72rem"><strong style="color:var(--red)">APPLY HPCL</strong> — hindustanpetroleum.com — Fee ₹1,180 — Deadline: <strong style="color:var(--red)">March 25</strong></div>
+        <div style="font-family:'Orbitron',monospace;font-size:.85rem;font-weight:900;color:var(--red);flex-shrink:0;text-shadow:0 0 8px rgba(248,113,113,.35)" id="apDays">--d</div>
+      </div>
+
+      <!-- HERO -->
+      <div class="hero">
+        <div class="av">🗡️</div>
+        <div class="hi">
+          <div class="hn">ROHIT MAZUMDAR</div>
+          <div class="hc">◆ HPCL IS THE FIRST CHECKPOINT, NOT THE VERDICT ◆</div>
+          <div class="hlr">
+            <div class="hlv">Lv.<span id="lvN">1</span></div>
+            <div class="ew">
+              <div class="el"><span>EXP</span><span id="expT">0 / 100</span></div>
+              <div class="bar"><div class="bi bb" id="expB" style="width:0%"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STATS -->
+      <div class="st">PLAYER STATS</div>
+      <div class="sg" id="statsG"></div>
+
+      <!-- PHASE TRACKER -->
+      <div class="st">CURRENT PHASE</div>
+      <div class="phase-row" id="phaseRow"></div>
+
+      <!-- TODAY FOCUS -->
+      <div class="st">TODAY'S FOCUS</div>
+      <div class="pn" id="todayFocus"></div>
+
+      <!-- TRACK PROGRESS -->
+      <div class="st">MISSION TRACKS</div>
+      <div class="pn">
+        <div style="display:flex;align-items:center;gap:.7rem;margin-bottom:.55rem">
+          <span style="font-size:.85rem">🔴</span>
+          <div style="flex:1">
+            <div style="font-size:.75rem;font-weight:600;margin-bottom:.2rem">HPCL Officer-IS</div>
+            <div style="font-size:.6rem;color:var(--t2);margin-bottom:.25rem">CBT Exam — May 3, 2026 — PRIMARY</div>
+            <div class="bar"><div class="bi br" id="hpBar" style="width:0%"></div></div>
+          </div>
+          <div style="font-family:'Orbitron',monospace;font-size:.65rem;color:var(--red);flex-shrink:0" id="hpPct">0%</div>
+        </div>
+        <div class="div"></div>
+        <div style="display:flex;align-items:center;gap:.7rem;margin-bottom:.55rem">
+          <span style="font-size:.85rem">🟢</span>
+          <div style="flex:1">
+            <div style="font-size:.75rem;font-weight:600;margin-bottom:.2rem">BSNL SET Telecom</div>
+            <div style="font-size:.6rem;color:var(--t2);margin-bottom:.25rem">Post May 3 — 50% already covered by HPCL prep</div>
+            <div class="bar"><div class="bi bg" id="bsBar" style="width:0%"></div></div>
+          </div>
+          <div style="font-family:'Orbitron',monospace;font-size:.65rem;color:var(--green);flex-shrink:0" id="bsPct">0%</div>
+        </div>
+        <div class="div"></div>
+        <div style="display:flex;align-items:center;gap:.7rem">
+          <span style="font-size:.85rem">🔵</span>
+          <div style="flex:1">
+            <div style="font-size:.75rem;font-weight:600;margin-bottom:.2rem">Data Analytics → AI/ML</div>
+            <div style="font-size:.6rem;color:var(--t2);margin-bottom:.25rem">Long game — resume full pace after May 3</div>
+            <div class="bar"><div class="bi bb" id="aiBar" style="width:0%"></div></div>
+          </div>
+          <div style="font-family:'Orbitron',monospace;font-size:.65rem;color:var(--blue);flex-shrink:0" id="aiPct">0%</div>
+        </div>
+      </div>
+
+      <!-- STREAK -->
+      <div class="st">STREAK</div>
+      <div class="pn" style="display:flex;gap:.9rem;align-items:center">
+        <div style="text-align:center;flex-shrink:0">
+          <div style="font-family:'Orbitron',monospace;font-size:1.8rem;font-weight:900;color:var(--gold);text-shadow:0 0 12px rgba(251,191,36,.28)" id="strkN">0</div>
+          <div style="font-size:.55rem;color:var(--t2);letter-spacing:.1em">DAYS</div>
+        </div>
+        <div>
+          <div style="font-size:.78rem;font-weight:600">Daily Study Streak</div>
+          <div style="font-size:.64rem;color:var(--t2);margin-top:.15rem">Complete all daily quests to maintain. Miss a day — reset.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUESTS -->
+    <div class="sc" id="sc-quests">
+      <div class="pal" id="penAl">
+        <div class="pai">⚠️</div>
+        <div class="pat"><strong>PENALTY WARNING:</strong> Missing daily quests. Complete before midnight.</div>
+      </div>
+      <div class="qtabs">
+        <button class="qt on" onclick="fq('all',this)">ALL</button>
+        <button class="qt" onclick="fq('hpcl',this)">🔴 HPCL</button>
+        <button class="qt" onclick="fq('bsnl',this)">🟢 BSNL</button>
+        <button class="qt" onclick="fq('ai',this)">🔵 DATA/AI</button>
+        <button class="qt" onclick="fq('gym',this)">🟠 GYM</button>
+        <button class="qt" onclick="fq('life',this)">🟣 LIFE</button>
+      </div>
+      <div class="ql" id="questL"></div>
+      <div class="st" style="margin-top:.9rem">ADD QUEST</div>
+      <div class="ap">
+        <div class="ar">
+          <input class="si2" id="qNm" placeholder="Quest name..." />
+          <select class="ss" id="qTr">
+            <option value="hpcl">HPCL</option>
+            <option value="bsnl">BSNL</option>
+            <option value="ai">DATA/AI</option>
+            <option value="gym">GYM</option>
+            <option value="life">LIFE</option>
+          </select>
+          <select class="ss" id="qTp">
+            <option value="daily">DAILY</option>
+            <option value="main">MAIN</option>
+          </select>
+          <input class="si2" id="qEx" placeholder="EXP" type="number" style="max-width:65px" />
+          <button class="sbtn" onclick="addQ()">+ ADD</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCHEDULE -->
+    <div class="sc" id="sc-schedule">
+      <div class="st">TODAY'S SCHEDULE</div>
+      <div style="font-size:.68rem;color:var(--t2);margin-bottom:.75rem">3 hrs study/day — built around your real day. Gym is non-negotiable.</div>
+      <div class="tl" id="tlEl"></div>
+    </div>
+
+    <!-- ROADMAP -->
+    <div class="sc" id="sc-roadmap">
+      <div style="background:rgba(248,113,113,.05);border:1px solid rgba(248,113,113,.25);padding:.6rem .85rem;margin-bottom:.75rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem">
+        <div style="font-size:.72rem"><strong style="color:var(--red)">⚡ APPLY HPCL</strong> by March 25 — hindustanpetroleum.com — ₹1,180</div>
+        <div style="font-family:'Orbitron',monospace;font-size:.85rem;color:var(--red);flex-shrink:0" id="apDays2">--d</div>
+      </div>
+
+      <!-- Philosophy pill -->
+      <div class="pn" style="margin-bottom:.75rem">
+        <div style="font-size:.7rem;color:var(--t2);line-height:1.7">
+          <strong style="color:var(--gold)">Goal:</strong> Build a foundation for all future PSU exams. <strong style="color:var(--t1)">HPCL is the first checkpoint, not the verdict.</strong><br><br>
+          <strong style="color:var(--blue)">The rule:</strong> Cover less. Practice more. Show up every day.<br>
+          DBMS + Networking + Aptitude = majority of scoreable marks. Master these three first.<br><br>
+          <strong style="color:var(--green)">Daily log:</strong> Track what you attempted, not what you completed.<br>
+          e.g. <em style="color:var(--t1)">"20 DBMS MCQs, got 14 right."</em> That's it.
+        </div>
+      </div>
+
+      <div class="st">4-PHASE PLAN</div>
+      <div id="phCards"></div>
+
+      <div class="st" style="margin-top:.9rem">TOPIC PRIORITY</div>
+      <div id="topicCards"></div>
+
+      <div class="st" style="margin-top:.9rem">BSNL — POST MAY 3</div>
+      <div class="pn" style="font-size:.72rem;color:var(--t2);line-height:1.7">
+        By May 3 you'll have already covered <strong style="color:var(--green)">~50% of BSNL's marks</strong> from HPCL prep:<br>
+        IP Networks (15%) + Emerging Tech (15%) + Aptitude (20%)<br><br>
+        <strong style="color:var(--t1)">Remaining after May 3:</strong> Wireline (3d) · Signals (5d) · Wireless 5G (5d) · Optical Fiber (3d) · Project Mgmt (2d)<br>
+        Total: ~3–4 weeks focused prep once exam date is announced.
+      </div>
+
+      <div class="st" style="margin-top:.9rem">WHAT HAPPENS IN EACH SCENARIO</div>
+      <div id="scenarioCards"></div>
+
+      <div class="st" style="margin-top:.9rem">DAILY LOG</div>
+      <div class="pn">
+        <div style="font-size:.68rem;color:var(--t2);margin-bottom:.7rem">Track what you attempted, not what you completed. Keep it simple.</div>
+        <div id="logList" style="display:flex;flex-direction:column;gap:.35rem;margin-bottom:.7rem"></div>
+        <div style="display:flex;gap:.4rem;flex-wrap:wrap">
+          <input class="si2" id="logEntry" placeholder='e.g. "20 DBMS MCQs, got 14 right"' style="flex:1;min-width:160px" />
+          <button class="sbtn" onclick="addLog()">+ LOG</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ARMY -->
+    <div class="sc" id="sc-army">
+      <div class="st">SHADOW ARMY</div>
+      <div style="font-size:.68rem;color:var(--t2);margin-bottom:.75rem">Shadows unlock as you level up — each represents a real skill or milestone achieved.</div>
+      <div class="shg" id="shGrid"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// -- DATA --------------------------------------------------------------------
+
+const SCENARIOS = [
+  { icon:'🏆', title:'You crack HPCL CBT -- shortlisted', color:'gold',
+    body:"Prepare for GD/PI: know HPCL's 4 refineries (Vizag, Mumbai, Bathinda, Barmer), major products (petrol, diesel, LPG, aviation fuel), HPCL's IT systems and ERP, recent CSR news. GD/PI prep takes 2-3 weeks -- start only after shortlist." },
+  { icon:'🔄', title:"HPCL CBT doesn't work out", color:'green',
+    body:"You still have BSNL SET (exam date TBA) -- HPCL prep already covers 50% of its marks. Resume BSNL plan from May 4. You can also attempt IOCL, BPCL, and ONGC officer exams in the next cycle -- all use similar IS/CS patterns." },
+  { icon:'🛡️', title:"Both exams don't work out", color:'blue',
+    body:"3 months of focused CS revision has rebuilt your technical foundation. This directly helps in Data Analytics roles, technical interviews, and any future PSU attempt. DBMS, Networking, OS are foundational skills every tech employer values. Nothing is wasted." },
+];
+
+const PHASES = [
+  { num:1, name:'Foundation', dates:'Mar 11-25', status:'cur',
+    morning:'Days 1-8: DBMS+SQL (Gate Smashers). Days 9-15: Networking (OSI, TCP/IP, IPv4, DNS).',
+    evening:'Days 1-8: 50 Aptitude MCQs (IndiaBix). Days 9-15: 50 Networking MCQs.' },
+  { num:2, name:'Core Topics', dates:'Mar 26-Apr 10', status:'up',
+    morning:'Days 1-6: OS (scheduling, deadlock, paging). Days 7-10: Cloud+Emerging Tech. Days 11-16: SE+Cybersecurity.',
+    evening:'Alternate: Odd days Aptitude MCQs, Even days Technical MCQs. Weekend: 1 full mock test.' },
+  { num:3, name:'Mock+Revise', dates:'Apr 11-30', status:'up',
+    morning:'No new topics. Revise yesterday\'s wrong answers + 1 weak topic summary. DBMS->Networking->OS rotation.',
+    evening:'Mock tests every alternate day (Testbook/Oliveboard). Target 55%+ by Apr 20, 60%+ by Apr 30.' },
+  { num:4, name:'Final 3 Days', dates:'May 1-3', status:'up',
+    morning:'May 1: DBMS+Networking notes. May 2: OS+GK+formula sheet. May 3: 🎯 EXAM DAY.',
+    evening:'May 1: 25 mixed MCQs only. May 2: Read HPCL website  -  refineries, products. May 3: Rest.' },
+];
+
+const TOPICS = [
+  { pri:'🥇 #1', name:'DBMS & SQL', days:'8 days', color:'red', scope:'SQL joins/queries, normalization 1NF-3NF only, ER diagrams, ACID, basic transactions, indexing concept', resource:'Gate Smashers DBMS (YouTube) + IndiaBix Database' },
+  { pri:'🥇 #1', name:'Networking', days:'7 days', color:'red', scope:'OSI 7 layers, TCP/IP, IPv4+subnetting basics, DNS/DHCP/HTTP/FTP, firewall concept', resource:'Gate Smashers Computer Networks + IndiaBix Networking ✅ Also covers BSNL IP section (15%)' },
+  { pri:'🥇 #1', name:'Aptitude & Reasoning', days:'Daily', color:'gold', scope:'50 MCQs every evening  -  percentages, ratios, time-speed, number series, logical reasoning, DI', resource:'IndiaBix Aptitude + Adda247 YouTube + Testbook free mocks ✅ Shared with BSNL' },
+  { pri:'🥈 #2', name:'Operating Systems', days:'6 days', color:'orange', scope:'CPU scheduling (FCFS/SJF/RR), deadlock conditions+prevention, paging vs segmentation, process states', resource:'Gate Smashers OS playlist + IndiaBix Operating System' },
+  { pri:'🥈 #2', name:'Cloud + Emerging Tech', days:'4 days', color:'blue', scope:'IaaS/PaaS/SaaS, public/private/hybrid cloud, IoT basics, SDN concept, AI in networks overview', resource:'GeeksforGeeks articles + freeCodeCamp YouTube ✅ Shared with BSNL Emerging Tech (15%)' },
+  { pri:'🥉 #3', name:'SE + Cybersecurity', days:'4 days', color:'purple', scope:'SDLC model names+Agile basics, CIA triad, phishing/MITM/SQL injection, encryption concept only', resource:'Gate Smashers SE playlist + GeeksforGeeks Cybersecurity' },
+  { pri:'⏭ SKIP', name:'Data Structures (deep)', days:'1 day MAX', color:'dim', scope:'Array/stack/queue basics + sorting names + Big-O concept only. Do not go deeper.', resource:'IndiaBix basics only  -  30 min max' },
+];
+
+const SCHEDULE = [
+  { time:'6:00', label:'Technical Theory', sub:'1 topic only from priority list  -  45 min focused study', tracks:['hpcl'], type:'study' },
+  { time:'6:45', label:'General Awareness', sub:'GK Today app + 1 article (oil & gas / telecom news)  -  45 min', tracks:['hpcl','bsnl'], type:'study' },
+  { time:'7:30', label:'Morning Meal', sub:'Breakfast  -  quick prep, fuel for the day', tracks:['meal'], type:'meal' },
+  { time:'8:00', label:'Work  -  AGCL', sub:'React, Spring Boot, PostgreSQL  -  observe data systems passively', tracks:['work'], type:'work' },
+  { time:'4:00', label:'Meal Prep & Eat', sub:'Cook + eat before gym  -  duration varies by what you prepare', tracks:['meal'], type:'meal' },
+  { time:'5:30', label:'Gym', sub:'Complete mental break  -  no studying. 2 hours. Non-negotiable.', tracks:['gym'], type:'gym' },
+  { time:'7:30', label:'Post-Gym Meal', sub:'Cook dinner + eat  -  replenish after training. Duration varies.', tracks:['meal'], type:'meal' },
+  { time:'8:00', label:'MCQ Practice', sub:'50 questions  -  alternate daily: Aptitude / Technical (1.5 hrs)', tracks:['hpcl','bsnl'], type:'study' },
+  { time:'9:30', label:'Wind Down', sub:'Light notes review or GK. No screens after 11 PM.', tracks:['rest'], type:'rest' },
+  { time:'11:00', label:'Sleep', sub:'Lights out. Recovery = performance tomorrow.', tracks:['rest'], type:'rest' },
+];
+
+const SHADOWS = [
+  { id:'will', name:'IRON WILL', icon:'🔥', rank:'E-Rank', desc:'Daily habit maintained', req:1, locked:false },
+  { id:'dbms', name:'SCHOLAR', icon:'📚', rank:'E-Rank', desc:'DBMS+SQL mastered', req:1, locked:false },
+  { id:'net', name:'NETRUNNER', icon:'🌐', rank:'D-Rank', desc:'Networking conquered', req:5, locked:true },
+  { id:'igris', name:'IGRIS', icon:'🛡️', rank:'D-Rank', desc:'HPCL application submitted', req:8, locked:true },
+  { id:'os', name:'KERNEL', icon:'⚙️', rank:'C-Rank', desc:'OS & Systems mastered', req:10, locked:true },
+  { id:'mock', name:'HUNTER', icon:'🎯', rank:'C-Rank', desc:'First mock test cleared 55%+', req:12, locked:true },
+  { id:'beru', name:'BERU', icon:'⚡', rank:'B-Rank', desc:'HPCL CBT passed', req:20, locked:true },
+  { id:'analyst', name:'ANALYST', icon:'📊', rank:'A-Rank', desc:'Data Analytics portfolio built', req:30, locked:true },
+  { id:'kaisel', name:'KAISEL', icon:'🐉', rank:'S-Rank', desc:'AI/ML role secured or moved abroad', req:50, locked:true },
+];
+
+const QUESTS_DEFAULT = [
+  // Daily HPCL
+  { id:1, name:'Morning Theory', desc:'1 topic from priority list  -  45 min (6:00-6:45 AM)', track:'hpcl', type:'daily', exp:20, done:false, time:'6:00 AM' },
+  { id:2, name:'General Awareness', desc:'GK Today + 1 news article  -  oil & gas / telecom (6:45-7:30 AM)', track:'hpcl', type:'daily', exp:10, done:false, time:'6:45 AM' },
+  { id:3, name:'Evening MCQ Practice', desc:'50 questions  -  Aptitude or Technical alternating daily (8:00-9:30 PM)', track:'hpcl', type:'daily', exp:25, done:false, time:'8:00 PM' },
+  // Gym
+  { id:4, name:'Gym Session', desc:'5:30-7:30 PM  -  full mental break, complete recovery. Non-negotiable.', track:'gym', type:'daily', exp:20, done:false, time:'5:30 PM' },
+  // Main Quests
+  { id:5, name:'⚡ Apply for HPCL Officer-IS', desc:'hindustanpetroleum.com  -  Fee ₹1,180  -  DEADLINE March 25', track:'hpcl', type:'main', exp:100, done:false, time:'⚡ By Mar 25' },
+  { id:6, name:'Complete Phase 1  -  DBMS', desc:'SQL, joins, normalization 1NF-3NF, ER diagrams, ACID (Days 1-8)', track:'hpcl', type:'main', exp:80, done:false, time:'Mar 11-18' },
+  { id:7, name:'Complete Phase 1  -  Networking', desc:'OSI, TCP/IP, IPv4, DNS, DHCP, HTTP, firewall (Days 9-15)', track:'hpcl', type:'main', exp:80, done:false, time:'Mar 19-25' },
+  { id:8, name:'Complete Phase 2  -  OS', desc:'CPU scheduling, deadlock, paging, process states (Days 1-6)', track:'hpcl', type:'main', exp:70, done:false, time:'Mar 26-31' },
+  { id:9, name:'Complete Phase 2  -  Cloud+SE+Cyber', desc:'IaaS/PaaS, IoT, SDN, SDLC, CIA triad, attack types', track:'hpcl', type:'main', exp:70, done:false, time:'Apr 1-10' },
+  { id:10, name:'First Mock Test  -  50%+ Score', desc:'Take full mock on Testbook or Oliveboard PSU IS', track:'hpcl', type:'main', exp:100, done:false, time:'Apr 11' },
+  { id:11, name:'Mock Test  -  60%+ Score', desc:'Target by end of Phase 3 (Apr 30)', track:'hpcl', type:'main', exp:150, done:false, time:'Apr 30' },
+  { id:12, name:'🎯 Crack HPCL CBT Exam', desc:'The primary objective. Everything leads here.', track:'hpcl', type:'main', exp:500, done:false, time:'May 3' },
+  // Post May 3
+  { id:13, name:'Resume BSNL Prep', desc:'Signals, Wireless 5G, Optical Fiber, Wireline  -  3-4 weeks focused', track:'bsnl', type:'main', exp:60, done:false, time:'May 4' },
+  { id:14, name:'Resume Data/AI Full Pace', desc:'Python, Pandas, projects  -  back to 45 min/day habit', track:'ai', type:'main', exp:60, done:false, time:'May 4' },
+];
+
+// -- STATE -------------------------------------------------------------------
+let S = JSON.parse(localStorage.getItem('rohit_lean_v1') || 'null') || {
+  level:1, exp:0, expNeeded:100, streak:0, lastDate:null,
+  stats:{ STR:10, INT:10, VIT:10, AGI:10, END:10, WIL:10 },
+  quests: JSON.parse(JSON.stringify(QUESTS_DEFAULT)),
+  shadows: JSON.parse(JSON.stringify(SHADOWS)),
+  tp:{ hpcl:0, bsnl:0, ai:0 },
+  nid:200,
+  qf:'all',
+  dailyLog:[],
+};
+function save(){ localStorage.setItem('rohit_lean_v1', JSON.stringify(S)); }
+
+// -- BOOT --------------------------------------------------------------------
+const BOOT_MSGS = [
+  '> Scanning for eligible player...',
+  '> Player found: ROHIT MAZUMDAR  -  Goalpara, Assam',
+  '> Lean Protocol engaged  -  3 hrs/day / cutoff-focused',
+  '> Primary target: HPCL CBT  -  May 3, 2026',
+  '> Phase 1 ACTIVE: DBMS + Networking',
+  '> Shadow Army initialized.',
+  '> System ready. Arise.',
+];
+function boot(){
+  const c = document.getElementById('bl');
+  BOOT_MSGS.forEach((m,i) => {
+    const d = document.createElement('div');
+    d.className = 'bl' + (i===BOOT_MSGS.length-1?' ok':'');
+    d.textContent = m;
+    d.style.animationDelay = (.28 + i*.32)+'s';
+    c.appendChild(d);
+  });
+  setTimeout(()=>{
+    const b = document.getElementById('boot');
+    b.style.transition='opacity .45s';
+    b.style.opacity='0';
+    setTimeout(()=>{ b.style.display='none'; document.getElementById('app').classList.add('on'); renderAll(); }, 450);
+  }, 3600);
+}
+
+// -- SCREEN SWITCH ------------------------------------------------------------
+function sw(id, btn){
+  document.querySelectorAll('.sc').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
+  document.getElementById('sc-'+id).classList.add('on');
+  btn.classList.add('on');
+}
+
+// -- RENDER ALL ---------------------------------------------------------------
+function renderAll(){
+  updateTopbar(); renderStats(); renderExpBar();
+  renderPhases(); renderTodayFocus(); renderTrackPct();
+  renderStreak(); renderQuests(); renderSchedule();
+  renderRoadmap(); renderShadows(); updateCountdowns(); renderLog();
+}
+
+// -- TOPBAR -------------------------------------------------------------------
+function updateTopbar(){
+  document.getElementById('tbLv').textContent = S.level;
+  document.getElementById('tbDate').textContent = new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+  const ranks = [[1,'E-RANK'],[10,'D-RANK'],[20,'C-RANK'],[30,'B-RANK'],[40,'A-RANK'],[50,'S-RANK']];
+  let r='E-RANK'; for(const [l,n] of ranks) if(S.level>=l) r=n;
+  document.getElementById('tbRank').textContent = r;
+}
+
+// -- COUNTDOWNS ---------------------------------------------------------------
+function updateCountdowns(){
+  const exam = new Date('2026-05-03');
+  const apply = new Date('2026-03-25');
+  const now = new Date();
+  const examD = Math.max(0, Math.ceil((exam-now)/(864e5)));
+  const applyD = Math.ceil((apply-now)/(864e5));
+  document.getElementById('cdDays').textContent = examD;
+  const apStr = applyD > 0 ? applyD+'d' : (applyD===0?'TODAY':'PASSED');
+  ['apDays','apDays2'].forEach(id=>{ const el=document.getElementById(id); if(el) el.textContent=apStr; });
+}
+
+// -- STATS --------------------------------------------------------------------
+const SM = { STR:{i:'💪',l:'STRENGTH'}, INT:{i:'🧠',l:'INTELLIGENCE'}, VIT:{i:'❤️',l:'VITALITY'}, AGI:{i:'⚡',l:'AGILITY'}, END:{i:'🛡️',l:'ENDURANCE'}, WIL:{i:'🔥',l:'WILLPOWER'} };
+function renderStats(){
+  const g = document.getElementById('statsG'); g.innerHTML='';
+  for(const [k,v] of Object.entries(S.stats)){
+    const m=SM[k];
+    const el=document.createElement('div'); el.className='sb';
+    el.innerHTML=`<div class="si">${m.i}</div><div class="sl">${m.l}</div><div class="sv">${v}</div>`;
+    g.appendChild(el);
+  }
+}
+
+// -- EXP BAR ------------------------------------------------------------------
+function renderExpBar(){
+  const p = Math.min((S.exp/S.expNeeded)*100,100);
+  document.getElementById('expB').style.width=p+'%';
+  document.getElementById('expT').textContent=`${S.exp} / ${S.expNeeded}`;
+  document.getElementById('lvN').textContent=S.level;
+  document.getElementById('tbLv').textContent=S.level;
+}
+
+// -- PHASES -------------------------------------------------------------------
+function renderPhases(){
+  const row = document.getElementById('phaseRow'); row.innerHTML='';
+  PHASES.forEach(p=>{
+    const el=document.createElement('div');
+    el.className='ph '+(p.status==='cur'?'active':p.status==='don'?'done':'locked');
+    const badge = p.status==='cur'?'<span class="ph-badge a">ACTIVE</span>':p.status==='don'?'<span class="ph-badge d">✓</span>':'<span class="ph-badge u">SOON</span>';
+    el.innerHTML=`${badge}<div class="ph-num">PHASE ${p.num}</div><div class="ph-name">${p.name}</div><div class="ph-dates">${p.dates}</div>`;
+    row.appendChild(el);
+  });
+}
+
+// -- TODAY FOCUS --------------------------------------------------------------
+function renderTodayFocus(){
+  // Determine current phase based on date
+  const now = new Date();
+  const start = new Date('2026-03-11');
+  const day = Math.max(1, Math.ceil((now-start)/(864e5)));
+  let focus, evening;
+  if(day <= 8){ focus='DBMS & SQL  -  SQL joins, normalization 1NF-3NF, ER diagrams, ACID'; evening='50 Aptitude MCQs  -  percentages, ratios, number systems'; }
+  else if(day <= 15){ focus='Networking  -  OSI 7 layers, TCP/IP, IPv4, DNS, DHCP, HTTP'; evening='50 Networking MCQs  -  OSI, subnetting, protocols (IndiaBix)'; }
+  else if(day <= 21){ focus='Operating Systems  -  CPU scheduling (FCFS/SJF/RR), deadlock'; evening=day%2===0?'50 Technical MCQs  -  OS topics':'50 Aptitude MCQs  -  reasoning + DI'; }
+  else if(day <= 25){ focus='Cloud + Emerging Tech  -  IaaS/PaaS/SaaS, IoT, SDN basics'; evening=day%2===0?'50 Technical MCQs  -  Cloud/Emerging Tech':'50 Aptitude MCQs'; }
+  else if(day <= 31){ focus='SE + Cybersecurity  -  SDLC, Agile, CIA triad, attack types'; evening=day%2===0?'50 Technical MCQs  -  SE/Cyber':'50 Aptitude MCQs'; }
+  else if(day <= 54){ focus='MOCK TEST MODE  -  Revision only, no new topics'; evening='Mock test on Testbook or Oliveboard  -  analyse every wrong answer'; }
+  else{ focus='FINAL STRETCH  -  Notes only, documents ready'; evening='Light practice  -  25 mixed MCQs max'; }
+
+  document.getElementById('todayFocus').innerHTML=`
+    <div style="display:flex;gap:.6rem;align-items:flex-start;margin-bottom:.5rem">
+      <span style="font-size:.85rem;flex-shrink:0">🌅</span>
+      <div><div style="font-size:.7rem;font-family:'Orbitron',monospace;color:var(--blue);letter-spacing:.08em;margin-bottom:.18rem">MORNING (6:00-7:30 AM)</div>
+      <div style="font-size:.78rem;color:var(--t1)">${focus}</div></div>
+    </div>
+    <div class="div"></div>
+    <div style="display:flex;gap:.6rem;align-items:flex-start">
+      <span style="font-size:.85rem;flex-shrink:0">🌙</span>
+      <div><div style="font-size:.7rem;font-family:'Orbitron',monospace;color:var(--gold);letter-spacing:.08em;margin-bottom:.18rem">EVENING (8:00-9:30 PM)</div>
+      <div style="font-size:.78rem;color:var(--t1)">${evening}</div></div>
+    </div>
+  `;
+}
+
+// -- TRACK PCT ----------------------------------------------------------------
+function renderTrackPct(){
+  const set=(bid,pid,v)=>{
+    const b=document.getElementById(bid); if(b) b.style.width=v+'%';
+    const p=document.getElementById(pid); if(p) p.textContent=Math.round(v)+'%';
+  };
+  set('hpBar','hpPct',S.tp.hpcl);
+  set('bsBar','bsPct',S.tp.bsnl);
+  set('aiBar','aiPct',S.tp.ai);
+}
+
+// -- STREAK -------------------------------------------------------------------
+function renderStreak(){ document.getElementById('strkN').textContent=S.streak; }
+
+// -- QUESTS -------------------------------------------------------------------
+let qf='all';
+function fq(f,btn){ qf=f; document.querySelectorAll('.qt').forEach(t=>t.classList.remove('on')); btn.classList.add('on'); renderQuests(); }
+
+function renderQuests(){
+  const list=document.getElementById('questL');
+  let qs=S.quests;
+  if(qf!=='all') qs=qs.filter(q=>q.track===qf);
+  qs=[...qs].sort((a,b)=>{ if(a.done!==b.done) return a.done?1:-1; if(a.type!==b.type) return a.type==='main'?1:-1; return 0; });
+  if(!qs.length){ list.innerHTML='<div class="empty">No quests in this category.</div>'; return; }
+  list.innerHTML='';
+  qs.forEach(q=>{
+    const el=document.createElement('div');
+    el.className='qc'+(q.done?' done':'');
+    el.innerHTML=`
+      <div class="qck ${q.done?'done':''}" onclick="tq(${q.id})">${q.done?'✓':''}</div>
+      <div class="qb">
+        <div class="qtg"><span class="tag t-${q.track}">${q.track.toUpperCase()}</span><span class="tag t-${q.type}">${q.type.toUpperCase()}</span></div>
+        <div class="qn">${q.name}</div>
+        <div class="qd">${q.desc}</div>
+      </div>
+      <div class="qr"><div class="qexp">+${q.exp} EXP</div><div class="qtm">${q.time||''}</div></div>
+    `;
+    list.appendChild(el);
+  });
+  // penalty check
+  const missed=S.quests.filter(q=>q.type==='daily'&&!q.done).length;
+  document.getElementById('penAl').classList.toggle('on',missed>=3);
+}
+
+function tq(id){
+  const q=S.quests.find(x=>x.id===id); if(!q) return;
+  if(q.done){ q.done=false; S.exp=Math.max(0,S.exp-q.exp); undoTp(q.track,q.exp); }
+  else{ q.done=true; gainExp(q.exp,q.track); showN(`✓ ${q.name} +${q.exp} EXP`); checkStreak(); }
+  renderQuests(); renderExpBar(); renderTrackPct(); renderStreak(); save();
+}
+
+function undoTp(track,exp){ const k=tpKey(track); S.tp[k]=Math.max(0,S.tp[k]-exp*.06); }
+function tpKey(t){ return t==='bsnl'?'bsnl':t==='ai'?'ai':'hpcl'; }
+
+function gainExp(amount,track){
+  S.exp+=amount;
+  const k=tpKey(track); S.tp[k]=Math.min(100,S.tp[k]+amount*.06);
+  const sm={hpcl:'INT',bsnl:'INT',ai:'INT',gym:'STR',life:'VIT'};
+  S.stats[sm[track]||'INT']++;
+  while(S.exp>=S.expNeeded){ S.exp-=S.expNeeded; levelUp(); }
+}
+
+function levelUp(){
+  S.level++;
+  S.expNeeded=Math.floor(S.expNeeded*1.5);
+  for(const k in S.stats) S.stats[k]+=Math.floor(Math.random()*2)+1;
+  const sh=S.shadows.find(s=>s.locked&&S.level>=s.req);
+  if(sh){ sh.locked=false; showN(`⚡ LV.${S.level}! SHADOW: ${sh.name}`,'gold'); renderShadows(); }
+  else showN(`⚡ LEVEL UP! Now Lv.${S.level}`,'gold');
+  updateTopbar(); renderStats();
+}
+
+function checkStreak(){
+  const today=new Date().toDateString();
+  if(S.lastDate!==today){
+    const yest=new Date(); yest.setDate(yest.getDate()-1);
+    S.streak = S.lastDate===yest.toDateString() ? S.streak+1 : 1;
+    S.lastDate=today;
+  }
+}
+
+function addQ(){
+  const nm=document.getElementById('qNm').value.trim();
+  const tr=document.getElementById('qTr').value;
+  const tp=document.getElementById('qTp').value;
+  const ex=parseInt(document.getElementById('qEx').value)||15;
+  if(!nm){ showN('Enter a quest name.','red'); return; }
+  S.quests.push({id:S.nid++,name:nm,desc:'Custom quest',track:tr,type:tp,exp:ex,done:false,time:''});
+  document.getElementById('qNm').value='';
+  document.getElementById('qEx').value='';
+  showN(`Quest added: ${nm}`); renderQuests(); save();
+}
+
+// -- SCHEDULE -----------------------------------------------------------------
+function renderSchedule(){
+  const tl=document.getElementById('tlEl'); tl.innerHTML='';
+  const now=new Date(); const ch=now.getHours()+now.getMinutes()/60;
+  const tmap={hpcl:'HPCL',bsnl:'BSNL',ai:'DATA/AI',gym:'GYM',work:'WORK',rest:'REST',meal:'MEAL'};
+  const tcol={hpcl:'var(--red)',bsnl:'var(--green)',ai:'var(--blue)',gym:'var(--orange)',work:'var(--t2)',rest:'var(--t2)',meal:'var(--gold)'};
+
+  SCHEDULE.forEach((item,i)=>{
+    const [h,m]=item.time.split(':').map(Number);
+    const ih=h+(m||0)/60;
+    const nx=SCHEDULE[i+1];
+    const nh=nx?(()=>{ const [a,b]=nx.time.split(':').map(Number); return a+(b||0)/60; })():24;
+    const isNow=ch>=ih&&ch<nh;
+    const tc={gym:'gym',meal:'meal',work:'work',rest:'',study:''}[item.type]||'';
+    const badges=item.tracks.map(t=>`<span class="trk" style="color:${tcol[t]};border-color:${tcol[t]}22">${tmap[t]||t.toUpperCase()}</span>`).join('');
+    tl.innerHTML+=`
+      <div class="tr">
+        <div class="tt">${item.time}</div>
+        <div class="tdw">
+          <div class="td" style="${isNow?'border-color:var(--blue);box-shadow:0 0 8px rgba(56,189,248,.45)':''}"></div>
+          ${i<SCHEDULE.length-1?'<div class="tln"></div>':''}
+        </div>
+        <div class="tc ${tc} ${isNow?'now':''}">
+          <div class="tlb">${item.label}${isNow?'<span class="now-b">NOW</span>':''}${badges}</div>
+          <div class="ts">${item.sub}</div>
+        </div>
+      </div>`;
+  });
+}
+
+// -- ROADMAP ------------------------------------------------------------------
+function renderRoadmap(){
+  // Phase cards
+  const pc=document.getElementById('phCards'); pc.innerHTML='';
+  PHASES.forEach(p=>{
+    const statusMap={cur:'<span class="ws cur">ACTIVE</span>',don:'<span class="ws don">✓ DONE</span>',up:'<span class="ws up">UPCOMING</span>',urg:'<span class="ws urg">⚡ URGENT</span>'};
+    const wc=document.createElement('div'); wc.className='wc';
+    wc.innerHTML=`
+      <div class="wh" onclick="this.nextElementSibling.classList.toggle('op')">
+        <div><div class="wt">PHASE ${p.num}  -  ${p.name}</div><div class="wd">${p.dates}</div></div>
+        ${statusMap[p.status]||statusMap.up}
+      </div>
+      <div class="wb ${p.status==='cur'?'op':''}">
+        <div class="wtp"><div class="wdot wrd"></div><div><div class="wlb">🌅 Morning (45 min theory)</div><div class="wsb">${p.morning}</div></div></div>
+        <div class="wtp"><div class="wdot wbl"></div><div><div class="wlb">🌙 Evening (1.5 hrs MCQ)</div><div class="wsb">${p.evening}</div></div></div>
+      </div>`;
+    pc.appendChild(wc);
+  });
+
+  // Scenario cards
+  const sc2=document.getElementById('scenarioCards'); if(sc2){ sc2.innerHTML='';
+  const scol={gold:'var(--gold)',green:'var(--green)',blue:'var(--blue)'};
+  SCENARIOS.forEach(s=>{
+    const el=document.createElement('div'); el.className='wc'; el.style.marginBottom='.4rem';
+    el.innerHTML=`
+      <div class="wh" onclick="this.nextElementSibling.classList.toggle('op')">
+        <div style="display:flex;align-items:center;gap:.6rem">
+          <span style="font-size:1rem">${s.icon}</span>
+          <div class="wt" style="color:${scol[s.color]}">${s.title}</div>
+        </div>
+        <span style="font-size:.7rem;color:var(--t2)">▾</span>
+      </div>
+      <div class="wb">
+        <div style="font-size:.72rem;color:var(--t2);line-height:1.65">${s.body}</div>
+      </div>`;
+    sc2.appendChild(el);
+  }); }
+
+  // Daily log
+  renderLog();
+  const cmap={red:'var(--red)',gold:'var(--gold)',orange:'var(--orange)',blue:'var(--blue)',purple:'var(--purple)',dim:'var(--t2)'};
+  TOPICS.forEach(t=>{
+    const wc=document.createElement('div'); wc.className='wc';
+    wc.innerHTML=`
+      <div class="wh" onclick="this.nextElementSibling.classList.toggle('op')">
+        <div><div class="wt" style="color:${cmap[t.color]}">${t.pri} ${t.name}</div><div class="wd">${t.days}</div></div>
+        <span class="ws up" style="color:${cmap[t.color]};border-color:${cmap[t.color]}44">${t.days}</span>
+      </div>
+      <div class="wb">
+        <div class="wtp"><div class="wdot" style="background:${cmap[t.color]}"></div><div><div class="wlb">Scope</div><div class="wsb">${t.scope}</div></div></div>
+        <div class="wtp"><div class="wdot wbl"></div><div><div class="wlb">Resource</div><div class="wsb">${t.resource}</div></div></div>
+      </div>`;
+    tc.appendChild(wc);
+  });
+}
+
+// -- SHADOWS ------------------------------------------------------------------
+function renderShadows(){
+  const g=document.getElementById('shGrid'); g.innerHTML='';
+  S.shadows.forEach(s=>{
+    const el=document.createElement('div');
+    el.className='shc '+(s.locked?'lk':'ul');
+    el.innerHTML=`<div class="shreq">${s.locked?s.req:'✓'}</div><div class="shi">${s.icon}</div><div class="shn">${s.name}</div><div class="shr">${s.locked?'???':s.rank}</div><div class="shd">${s.locked?'Locked':s.desc}</div>`;
+    if(!s.locked) el.onclick=()=>showN(`${s.icon} ${s.name}  -  ${s.rank}: ${s.desc}`);
+    g.appendChild(el);
+  });
+}
+
+// -- NOTIF --------------------------------------------------------------------
+let nt;
+function showN(msg,type=''){
+  const el=document.getElementById('notif');
+  el.textContent=msg;
+  el.className='notif on'+(type?' '+type:'');
+  clearTimeout(nt);
+  nt=setTimeout(()=>el.className='notif',2600);
+}
+
+// -- DAILY LOG ----------------------------------------------------------------
+function renderLog(){
+  const el=document.getElementById('logList'); if(!el) return;
+  if(!S.dailyLog||!S.dailyLog.length){ el.innerHTML='<div style="font-size:.7rem;color:var(--t2);text-align:center;padding:.5rem">No entries yet. Start logging.</div>'; return; }
+  el.innerHTML='';
+  // Show last 10, newest first
+  [...S.dailyLog].reverse().slice(0,10).forEach(entry=>{
+    const d=document.createElement('div');
+    d.style.cssText='display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem;padding:.4rem .5rem;background:rgba(56,189,248,.03);border:1px solid var(--b2)';
+    d.innerHTML=`<div style="font-size:.72rem;color:var(--t1);flex:1">${entry.text}</div><div style="font-size:.58rem;color:var(--t2);flex-shrink:0;white-space:nowrap">${entry.date}</div>`;
+    el.appendChild(d);
+  });
+}
+
+function addLog(){
+  const inp=document.getElementById('logEntry');
+  const text=inp.value.trim();
+  if(!text){ showN('Write what you attempted.','red'); return; }
+  if(!S.dailyLog) S.dailyLog=[];
+  const now=new Date();
+  S.dailyLog.push({ text, date: now.toLocaleDateString('en-IN',{day:'numeric',month:'short'}) });
+  inp.value='';
+  // Gain a small EXP for logging
+  gainExp(5,'hpcl');
+  renderLog(); renderExpBar(); renderTrackPct();
+  showN('Logged ✓ +5 EXP'); save();
+}
+
+// -- START --------------------------------------------------------------------
+boot();
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+}
+</script>
+</body>
+</html>
